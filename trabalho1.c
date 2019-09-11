@@ -295,7 +295,7 @@ void editar_switch(funcionario *ptr, int *quant){
 }
 
 void exclui_funcionario(funcionario *ptr, int *quant){
-    int indice, opcao = -1, certeza, achou = 0;
+    int indice, opcao = -1, certeza, achou = 0, ret;
     char *nome;
     printf("quant = %d\n\n", *quant);
 
@@ -329,7 +329,42 @@ void exclui_funcionario(funcionario *ptr, int *quant){
                         for(int i = indice - 1; i < *quant; i++){
                             ptr[i] = ptr[i + 1];
                         }
-                        *quant - 1;
+                        *quant -= 1;
+                        ptr = (funcionario *) realloc(ptr, *quant * sizeof(funcionario));
+                        if(ptr == NULL) {
+                            printf("ERRO!\n");
+                            exit(2);
+                        }
+                        printf("Funcionario excluido com sucesso!\n");
+                        break;
+                    }else
+                        break;
+                }
+            }
+            if(achou == 0){
+                printf("Funcionario não encontrado!\n");
+                sleep(1.0);
+            }
+            break;
+        case 2:
+            printf("Digite o nome completo do funcionario que quer excluir = ");
+            scanf("%[^\n[", nome);
+            for(int i = 0; i < *quant; i++){
+                ret = strcmp(ptr[i].nome, nome);
+                if(ret == 0){
+                    printf("Funcionario encontrado!\n");
+                    printf("%s -- %s -- %d\n", ptr[i].nome, ptr[i].email, ptr[i].idade);
+                    achou = 2;
+                    indice = i;
+                    sleep(1.0);
+                    printf("Tem certeza que deseja excluir esse funcionario?\n");
+                    printf("(1) = SIM\n(2) = NAO\n = ");
+                    scanf("%d", &certeza);
+                    if(certeza == 1){
+                        for(int i = indice; i < *quant; i++){
+                            ptr[i] = ptr[i + 1];
+                        }
+                        *quant -= 1;
                         ptr = (funcionario *) realloc(ptr, *quant * sizeof(funcionario));
                         if(ptr == NULL) {
                             printf("ERRO!\n");
