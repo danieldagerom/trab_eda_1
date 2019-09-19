@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 typedef struct Funcionario{
     int idade;
@@ -13,7 +14,9 @@ int cadastro(int *quant, int *novo);
 void incluifuncionario(funcionario *ptr, int quant, int *x);
 void imprimefuncionario(funcionario *ptr, int *quant);
 void editar_switch(funcionario *ptr, int *quant);
-void exclui_funcionario(funcionario *ptr, int *quant);
+void exclui_funcionario(funcionario *ptr, int *quant, int *check, int *x);
+void altera_string(char *string);
+void arruma_nome(char *string);
 void menu();
 
 int main(){
@@ -26,6 +29,7 @@ void menu(){
     int opcao = -1, quant = 0, novo = 0, cont = 0, check = 0, x = 0;
     while(opcao != 0){
         //system("clear");
+        system("clear");
         printf("Seja bem vindo ao primeiro trabalho de EDA1!\n");
         printf("____________________________________________\n");
         printf("________Esse eh o MENU DE OPCOES:___________\n");
@@ -52,25 +56,29 @@ void menu(){
             editar_switch(empregado, &quant);
             break;
         case 4:
-            exclui_funcionario(empregado, &quant);
+            exclui_funcionario(empregado, &quant, &check, &x);
             break;
         
         default:
             break;
         }
     }
-    for(int i = 0; i < quant; i++){
-        free(empregado[i].nome);
-        free(empregado[i].email);
-        printf("Apagou aqui!\n\n");
+    if(quant == 0){
+        exit(2);
+    }else{
+        for(int i = 0; i < quant; i++){
+            free(empregado[i].nome);
+            free(empregado[i].email);
+            //printf("Apagou aqui!\n\n");
+        }
+        free(empregado);    
+            //printf("Apagou aqui tambem!\n\n");
     }
-    free(empregado);    
-        printf("Apagou aqui tambem!\n\n");
-
 }
 
 void incluifuncionario(funcionario *ptr, int quant, int *x){
     int i;
+    //printf("%d == x\n", *x);
     for(i = *x; i < quant; i++){
         printf("\nDigite o nome do funcionario[%d] -> ", i + 1);
         getchar();
@@ -88,8 +96,9 @@ void incluifuncionario(funcionario *ptr, int quant, int *x){
 
 void imprimefuncionario(funcionario *ptr, int *quant){
     int i;
-    printf("quant = %d", *quant);
+    //printf("quant = %d", *quant);
     for(int i = 0; i < *quant; i++){
+        arruma_nome(ptr[i].nome);
         printf("  %s -- %s -- %d\n", ptr[i].nome, ptr[i].email, ptr[i].idade);
     }
     sleep(2.5);
@@ -105,15 +114,12 @@ int cadastro(int *quant, int *novo){
 
 funcionario *criafuncionario(int quant, int *check, int *x, funcionario *ptr){
     int i;
-    printf("CHEGOU AQUI\n\n\n");
+    //printf("CHEGOU AQUI\n\n\n");
     if(*check == 0){
-    printf("CHEGOU AQUI2\n\n\n");
-
+    //printf("CHEGOU AQUI2\n\n\n");
     funcionario *first;
-    printf("CHEGOU AQUI2\n\n\n");
-
+    //printf("CHEGOU AQUI2\n\n\n");
     first = (funcionario *) malloc(quant * sizeof(funcionario));
-
 
     if(first == NULL){
         printf("ERRO!\n"); 
@@ -122,7 +128,7 @@ funcionario *criafuncionario(int quant, int *check, int *x, funcionario *ptr){
 
         for(i = 0; i < quant; i++){
             first[i].nome = (char *) malloc(50 * sizeof(char));
-            printf("deu certo   ");
+            //printf("deu certo   ");
             if(first[i].nome == NULL){
                 printf("ERRO!\n");
                 exit(2);
@@ -130,7 +136,7 @@ funcionario *criafuncionario(int quant, int *check, int *x, funcionario *ptr){
         }
         for(i = 0; i < quant; i++){
             first[i].email = (char *) malloc(50 * sizeof(char));
-            printf("deu certo   ");
+            //printf("deu certo   ");
             if(first[i].email == NULL){
                 printf("ERRO!\n");
                 exit(2);
@@ -220,15 +226,19 @@ void editar_switch(funcionario *ptr, int *quant){
             scanf("%[^\n]", nome);
             for(int i = 0; i < *quant; i++){
                // printf("chegou aqui nome\n");
+               altera_string(ptr[i].nome);
+               altera_string(nome);
+                    
                 ret = strcmp(ptr[i].nome, nome);
-                if(ret == 0){
+                if(ret == 0 || strstr(ptr[i].nome, nome) != NULL){
                     indice = i;
                     achou++;
                     printf("achou %d\n", i);
-                    //break;
-                } }
+                 }
+            }   
             if(achou == 1){
                     printf("Funcionario encontrado!\n");
+                    arruma_nome(ptr[indice].nome);
                     printf("%s -- %s -- %d\n", ptr[indice].nome, ptr[indice].email, ptr[indice].idade);
                     sleep(1.0);
                     printf("____Editar___:\n");
@@ -242,7 +252,6 @@ void editar_switch(funcionario *ptr, int *quant){
                     scanf("%d", &ptr[indice].idade);
                     printf("Funcionario %s alterado com sucesso!\n", ptr[indice].nome);
                     sleep(1.0);
-                    //achou = 1;
             }else if(achou > 1){
                 printf("Mais de um funcionario com esse nome!\n utilize a funcao (3), pelo email, para editar!\n");
                 sleep(2.0);
@@ -252,13 +261,13 @@ void editar_switch(funcionario *ptr, int *quant){
                 printf("Funcionario não encontrado!\n");
                 sleep(1.0);
             } 
+            achou = 0;
             break;
         case 3:
             printf("Digite o email do funcionario que deseja editar: ");
             getchar();
             scanf("%[^\n]", email);
             for(int i = 0; i < *quant; i++){
-               // printf("chegou aqui nome\n");
                 ret = strcmp(ptr[i].email, email);
                 if(ret == 0){
                     printf("Funcionario encontrado!\n");
@@ -288,16 +297,16 @@ void editar_switch(funcionario *ptr, int *quant){
             break;
         }
     free(nome);
-    printf("limpou nome aux!!\n");
+    //printf("limpou nome aux!!\n");
     free(email);
-    printf("limpou email!!\n");
+    //printf("limpou email!!\n");
     }
 }
 
-void exclui_funcionario(funcionario *ptr, int *quant){
+void exclui_funcionario(funcionario *ptr, int *quant, int *check, int *x){
     int indice, opcao = -1, certeza, achou = 0, ret;
     char *nome;
-    printf("quant = %d\n\n", *quant);
+    //printf("quant = %d\n\n", *quant);
 
     nome = (char *) malloc(35 * sizeof(char));
     if(nome == NULL) {
@@ -320,24 +329,46 @@ void exclui_funcionario(funcionario *ptr, int *quant){
                 if(i == (indice - 1)){
                     printf("Funcionario encontrado!\n");
                     printf("%s -- %s -- %d\n", ptr[i].nome, ptr[i].email, ptr[i].idade);
+                    sleep(0.8);
                     achou = 2;
+                    indice = i;
                     sleep(1.0);
                     printf("Tem certeza que deseja excluir esse funcionario?\n");
                     printf("(1) = SIM\n(2) = NAO\n = ");
                     scanf("%d", &certeza);
                     if(certeza == 1){
-                        for(int i = indice - 1; i < *quant; i++){
-                            ptr[i] = ptr[i + 1];
-                        }
-                        *quant -= 1;
-                        ptr = (funcionario *) realloc(ptr, *quant * sizeof(funcionario));
-                        if(ptr == NULL) {
-                            printf("ERRO!\n");
-                            exit(2);
-                        }
-                        printf("Funcionario excluido com sucesso!\n");
-                        break;
-                    }else
+                        if(*quant <= 1){
+                            *check = 0; 
+                            *quant -= 1;
+                           // for(int i = 0; i < *quant; i++){
+                                free(ptr[0].nome);
+                                free(ptr[0].email);
+                            //}
+                            free(ptr);
+                            if(ptr == NULL) {
+                                printf("ERRO!\n");
+                                exit(2);
+                            }
+                            *x = *quant;
+
+                            printf("Funcionario excluido com sucesso!\n");
+                            break;   
+                        }else{
+                            *quant -= 1;
+                            for(int i = indice; i < *quant; i++){
+                                ptr[i] = ptr[i + 1];
+                            }
+                            ptr = (funcionario *) realloc(ptr, *quant * sizeof(funcionario));
+                            if(ptr == NULL) {
+                                printf("ERRO!\n");
+                                exit(2);
+                            }
+                            *x = *quant;
+                            printf("Funcionario excluido com sucesso!\n");
+                            break;
+                            }
+                    }
+                    else
                         break;
                 }
             }
@@ -348,12 +379,17 @@ void exclui_funcionario(funcionario *ptr, int *quant){
             break;
         case 2:
             printf("Digite o nome completo do funcionario que quer excluir = ");
-            scanf("%[^\n[", nome);
+            getchar();
+            scanf("%[^\n]", nome);
             for(int i = 0; i < *quant; i++){
+                altera_string(ptr[i].nome);
+                altera_string(nome);
                 ret = strcmp(ptr[i].nome, nome);
-                if(ret == 0){
+                if(ret == 0 || strstr(ptr[i].nome, nome) != NULL){
+                    arruma_nome(ptr[i].nome);
                     printf("Funcionario encontrado!\n");
                     printf("%s -- %s -- %d\n", ptr[i].nome, ptr[i].email, ptr[i].idade);
+                    sleep(0.8);
                     achou = 2;
                     indice = i;
                     sleep(1.0);
@@ -361,18 +397,40 @@ void exclui_funcionario(funcionario *ptr, int *quant){
                     printf("(1) = SIM\n(2) = NAO\n = ");
                     scanf("%d", &certeza);
                     if(certeza == 1){
-                        for(int i = indice; i < *quant; i++){
-                            ptr[i] = ptr[i + 1];
+                        if(*quant <= 1){
+                            *check = 0;
+                            *quant -= 1;
+                           // for(int i = 0; i < *quant; i++){
+                                free(ptr[0].nome);
+                                free(ptr[0].email);
+                            //}
+                            free(ptr);
+                            if(ptr == NULL) {
+                                printf("ERRO!\n");
+                                exit(2);
+                            }
+                            *x = *quant;
+                            printf("Funcionario excluido com sucesso!\n");
+                            break;   
+                        }else{
+                            *quant -= 1;
+                            for(int i = indice; i < *quant; i++){
+                                ptr[i] = ptr[i + 1];
+                            }
+                            ptr = (funcionario *) realloc(ptr, *quant * sizeof(funcionario));
+                            if(ptr == NULL) {
+                                printf("ERRO!\n");
+                                exit(2);
+                            }
+                            *x = *quant;
+                            printf("Funcionario excluido com sucesso!\n");
+                            break;
+                            }
+                        //if(*quant == 1){
+                            
                         }
-                        *quant -= 1;
-                        ptr = (funcionario *) realloc(ptr, *quant * sizeof(funcionario));
-                        if(ptr == NULL) {
-                            printf("ERRO!\n");
-                            exit(2);
-                        }
-                        printf("Funcionario excluido com sucesso!\n");
-                        break;
-                    }else
+                   // }
+                    else
                         break;
                 }
             }
@@ -386,8 +444,28 @@ void exclui_funcionario(funcionario *ptr, int *quant){
             break;
         }
     }
-
+    free(nome);
 }
+
+void altera_string(char *string){
+    for(unsigned int i = 0; i < strlen(string); i++){
+        string[i] = toupper(string[i]);
+    }
+    string[strlen(string)] = '\0';
+}
+
+void arruma_nome(char *string){
+    for(unsigned int i = 0; i < strlen(string); i++){
+        if(i == 0){
+            string[i] = toupper(string[i]);
+        }else{
+            string[i] = tolower(string[i]);   
+        }
+    }
+    string[strlen(string)] = '\0';
+}
+
+
 
 
 
