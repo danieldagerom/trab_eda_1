@@ -95,13 +95,17 @@ void incluifuncionario(funcionario *ptr, int quant, int *x){
 }
 
 void imprimefuncionario(funcionario *ptr, int *quant){
-    int i;
-    //printf("quant = %d", *quant);
+    //printf("quant = %d\n", *quant);
+    if(*quant < 1){
+        printf("Lista vazia!\n");
+        sleep(2.0);
+    }else{
     for(int i = 0; i < *quant; i++){
         arruma_nome(ptr[i].nome);
         printf("  %s -- %s -- %d\n", ptr[i].nome, ptr[i].email, ptr[i].idade);
     }
     sleep(2.5);
+    }
 }
 
 int cadastro(int *quant, int *novo){
@@ -352,6 +356,7 @@ void exclui_funcionario(funcionario *ptr, int *quant, int *check, int *x){
                             *x = *quant;
 
                             printf("Funcionario excluido com sucesso!\n");
+                            sleep(1.0);
                             break;   
                         }else{
                             *quant -= 1;
@@ -411,6 +416,7 @@ void exclui_funcionario(funcionario *ptr, int *quant, int *check, int *x){
                             }
                             *x = *quant;
                             printf("Funcionario excluido com sucesso!\n");
+                            sleep(1.0);
                             break;   
                         }else{
                             *quant -= 1;
