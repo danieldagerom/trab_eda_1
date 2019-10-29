@@ -106,6 +106,7 @@ int main(){
                 printf("2) Por matricula\n");
                 printf(" Opcao -> ");
                 scanf("%d", &opcao_visualizar);
+                //fiz esse switch para saber se o aluno ja existe, se tiver, ele vai ser mandado direto para a função, seu proprio node
                 switch (opcao_visualizar){
                     case 1:
                         printf("Digite o nome d@ alun@ -> ");
@@ -194,6 +195,7 @@ int main(){
 }
 
 void tracejado(){
+    //função mais complicada do trabalho inteiro, tem que ler com calma
     printf("----------------------------------------------\n");
 }
 
@@ -217,6 +219,7 @@ lista_disciplinas * create_list_disciplinas(){
 void print_list(list * List){
     if(is_empty(List)){
         printf("Lista vazia!\n");
+        sleep(1);
         return;
     }
     node *pointer = List->head;
@@ -287,7 +290,6 @@ int mencao_valida(char * mencao){
     }
     return 0;
 }
-
 
 void menu_vizualizar(node * Node){
     int opcao = -1;
@@ -407,8 +409,7 @@ void cadastro_disciplina(node * Node){
     getchar();
     scanf("%[^\n]", nome);
 
-    //printf("Mensoes validas: TR - SR - II - MI - MM - MS -SS\n");
-    printf("Digite a mencao do aluno ->");
+    printf("Digite a mencao do aluno -> ");
     getchar();
     scanf("%[^\n]", mencao);
         
@@ -499,6 +500,7 @@ void editar_disciplina(node * Node){
         sleep(1.5);
         return;
     }
+    free(nome);
 }
 
 void excluir_disciplina(lista_disciplinas * List){
@@ -523,9 +525,16 @@ void excluir_disciplina(lista_disciplinas * List){
             achou++;
         }
         Disciplina = Disciplina->next;
-        index++;
     }
     if(achou == 1){
+        Disciplina = List->head;
+        while(Disciplina != NULL){
+            if(strcmp(Disciplina->nome, nome) == 0){
+                break;
+            }
+            Disciplina = Disciplina->next;
+            index++;
+        }
         if(index == 0){
             List->head = aux->next;
             free(aux->nome);
@@ -534,21 +543,19 @@ void excluir_disciplina(lista_disciplinas * List){
             List->size--;
             printf("Materia %s excluida com sucesso!\n", nome); 
             sleep(1);
-            free(nome);
-            return;
+        }else{
+            aux = List->head;
+            for(int i = 0; aux != NULL && i < index - 1; i++) 
+                aux = aux->next; 
+            disciplina *next = aux->next->next;
+            free(aux->next->nome);
+            free(aux->next->mencao);
+            free(aux->next);
+            aux->next = next;
+            List->size--;
+            printf("Materia %s excluida com sucesso!\n", nome); 
+            sleep(1);
         }
-        for(int i = 0; aux != NULL && i < index - 1; i++) 
-            aux = aux->next; 
-        disciplina *next = aux->next->next;
-        free(aux->next->nome);
-        free(aux->next->mencao);
-        free(aux->next);
-        aux->next = next;
-        List->size--;
-        printf("Materia %s excluida com sucesso!\n", nome); 
-        sleep(1);
-        free(nome);
-
     }else if(achou > 1){
         printf("Existe mais de uma materia com esse nome!\n");
         printf("Por favor, digite o indice da materia para continuar -> ");
@@ -561,25 +568,25 @@ void excluir_disciplina(lista_disciplinas * List){
             List->size--;
             printf("Materia %s excluida com sucesso!\n", nome); 
             sleep(1);
-            free(nome);
-            return;
+        }else{
+            for (int i = 0; aux != NULL && i < indice - 2; i++) 
+                aux = aux->next; 
+            disciplina *next = aux->next->next;
+            free(aux->next->nome);
+            free(aux->next->mencao);
+            free(aux->next);
+            aux->next = next;
+            List->size--;
+            printf("Materia %s excluida com sucesso!\n", nome); 
+            sleep(1);
         }
-        for (int i = 0; aux != NULL && i < indice - 2; i++) 
-            aux = aux->next; 
-        disciplina *next = aux->next->next;
-        free(aux->next->nome);
-        free(aux->next->mencao);
-        free(aux->next);
-        aux->next = next;
-        List->size--;
-        printf("Materia %s excluida com sucesso!\n", nome); 
-        sleep(1);
-        free(nome);
     }else{
         printf("Materia nao encontrada!\n Por favor, verifique o nome da materia e tente novamente!\n");
         sleep(1.5);
         return;
     }
+    index = 0;
+    free(nome);
 
     
 }
@@ -614,6 +621,7 @@ void filtrar_disciplina(lista_disciplinas * List){
         if(strcmp(pointer->mencao, mencao) == 0){
             achou++;
             altera_string(pointer->nome);
+            tracejado();
             printf("Displina com mencao %s = %s\n", mencao, pointer->nome);
         }
         pointer = pointer->next;
@@ -643,6 +651,7 @@ void relatorio_geral(lista_disciplinas * List){
         }
         pointer = pointer->next;
     }
+    tracejado();
     printf("Alun@ com %d aprovacoes;\n", aprovadas);
     printf("Alun@ com %d reprovacoes;\n", reprovadas);
     printf("Alun@ com %d tracamentos;\n", trancamentos);
@@ -679,7 +688,6 @@ void editar_aluno(list * List){
         altera_string(Node->nome);
         if(strcmp(Node->nome, nome) == 0 || strstr(Node->nome, nome) != NULL){
             achou++;
-            printf("Achou viu mermao\n");
             aux = Node;
         }
         Node = Node->next;
@@ -742,6 +750,7 @@ void editar_aluno(list * List){
         printf("Aluno nao cadastrado!\n");
         sleep(1);
     }
+    free(nome);
 }
 
 void excluir_aluno(list * List){
@@ -793,32 +802,35 @@ void excluir_aluno(list * List){
             if(index == 0){
                 ListaDisciplinas = aux->materias;
                 List->head = aux->next;
+                printf("Alun@ %s excluido!\n", aux->nome);
                 free(aux->nome);
                 free(aux->email);
                 List->size--;
                 while(ListaDisciplinas->size != 0){
                     pop_disciplina(ListaDisciplinas);
+                    ListaDisciplinas->size--;
                 }
                 free(aux);
-                printf("Aluno excluido!\n");
             }else{
                 aux = List->head;
                 for(int i = 0; aux != NULL && i < index - 1; i++)
                     aux = aux->next;
                 node *next = aux->next->next;
                 ListaDisciplinas = aux->next->materias;
+                printf("ALun@ %s excluido!\n", aux->next->nome);
                 free(aux->next->nome);
                 free(aux->next->email);
                 List->size--;
                 while(ListaDisciplinas->size != 0){
                     pop_disciplina(ListaDisciplinas);
+                    ListaDisciplinas->size--;
                 }
                 free(aux);
-                printf("ALuno excluido!\n");
             }
             sleep(1); 
         }
     }else if(achou == 1){
+        Node = List->head;
         while(Node != NULL){
             if(strcmp(Node->nome, nome) == 0 || strstr(Node->nome, nome) != NULL){
                 break;
@@ -826,35 +838,36 @@ void excluir_aluno(list * List){
             Node = Node->next;
             index++;
         }if(index == 0){
-                aux = Node;
-                ListaDisciplinas = aux->materias;
-                List->head = aux->next;
-                free(aux->nome);
-                free(aux->email);
-                List->size--;
-                while(ListaDisciplinas->size != 0){
-                    pop_disciplina(ListaDisciplinas);
+                aux = Node;          
+                ListaDisciplinas = aux->materias;            
+                List->head = aux->next;            
+                printf("Alun@ %s excluido!\n", aux->nome);
+                free(aux->nome);            
+                free(aux->email);           
+                while(ListaDisciplinas->size != 0){           
+                    pop_disciplina(ListaDisciplinas);                            
                 }
                 free(aux);
-                printf("Aluno excluido!\n");
+                List->size--;
             }else{
                 aux = List->head;
                 for(int i = 0; aux != NULL && i < index - 1; i++)
                     aux = aux->next;
                 node *next = aux->next->next;
                 ListaDisciplinas = aux->next->materias;
+                printf("ALun@ %s excluido!\n", aux->next->nome);
                 free(aux->next->nome);
                 free(aux->next->email);
                 List->size--;
                 while(ListaDisciplinas->size != 0){
                     pop_disciplina(ListaDisciplinas);
                 }
-                free(aux);
-                printf("ALuno excluido!\n");
+                free(aux->next);
+                aux->next = next;
             }
             sleep(1); 
     }else{
-        printf("Aluno nao cadastrado!\n");
+        printf("Alun@ nao cadastrado!\n");
         sleep(1);
     }
     index = 0;
