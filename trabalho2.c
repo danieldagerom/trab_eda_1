@@ -230,6 +230,7 @@ void print_list(list * List){
         printf("Nome = %s\n", pointer->nome);
         printf("Email = %s\n", pointer->email);
         printf("Matricula = %d\n", pointer->matricula);
+        //tentei de varias formas, mas nao consegui corrigir o warning
         aux = pointer->materias;
         if(aux->size == 0){
             printf("Aluno sem disciplina\n");
@@ -238,10 +239,8 @@ void print_list(list * List){
         }
         pointer = pointer->next;
     }
-    sleep(2);
-
+    sleep(2);   
 }
-
 
 void push(list *List, node *Node) {
     if(Node != NULL) {
@@ -293,6 +292,10 @@ int mencao_valida(char * mencao){
 
 void menu_vizualizar(node * Node){
     int opcao = -1;
+    lista_disciplinas *materias;
+    // ta dando warning aqui pq eu resolvi outros que estavam aparecendo nessa função
+    // mas nao sei como resolver esse
+    materias = Node->materias;
         while(opcao != 0){
             system("clear");
             printf("________Menu Vizualizar:_________\n");
@@ -312,19 +315,19 @@ void menu_vizualizar(node * Node){
                     cadastro_disciplina(Node);
                     break;
                 case 2:
-                    listar_disciplinas(Node->materias);                   
+                    listar_disciplinas(materias);                   
                     break;
                 case 3 :
                     editar_disciplina(Node);
                     break;
                 case 4:
-                    excluir_disciplina(Node->materias);
+                    excluir_disciplina(materias);
                     break;
                 case 5:
-                    filtrar_disciplina(Node->materias);
+                    filtrar_disciplina(materias);
                     break;
                 case 6:
-                    relatorio_geral(Node->materias);
+                    relatorio_geral(materias);
                     break;
                 case 0:
                     break;
@@ -336,7 +339,6 @@ void menu_vizualizar(node * Node){
 }
 
 void cadastro(list * Lista){
-    //list *List;
     lista_disciplinas *List_d;
     node *Node;
     node *aux;
@@ -372,6 +374,7 @@ void cadastro(list * Lista){
     Node->nome = nome;
     Node->email = email;
     Node->matricula = matricula;
+    //professor, ta dando warning aqui mas eu nao sei outra forma de resolver
     List_d = create_list_disciplinas();
     Node->materias = List_d;
     push(Lista, Node);
@@ -418,7 +421,8 @@ void cadastro_disciplina(node * Node){
         node_disciplina = (disciplina *) malloc(sizeof(disciplina));
         node_disciplina->nome = nome;
         node_disciplina->mencao = mencao;
-        push_disciplina(Node->materias, node_disciplina);
+        List_d = Node->materias;
+        push_disciplina(List_d, node_disciplina);
 
         printf("Disciplina cadastrada com sucesso!\n");
         sleep(1);
@@ -591,7 +595,7 @@ void excluir_disciplina(lista_disciplinas * List){
     
 }
 void pop_disciplina(lista_disciplinas * List){
-     if(is_empty(List)){
+     if(is_empty_disciplinas(List)){
         printf("Lista Vazia!\n");
         return;
     }
@@ -800,6 +804,8 @@ void excluir_aluno(list * List){
                 index++;
             }
             if(index == 0){
+                //esse warning eu nao sei pq esta acontencendo, acontece durante alguns momentos do codigo
+                //os ponteiros sao do mesmo tipo 
                 ListaDisciplinas = aux->materias;
                 List->head = aux->next;
                 printf("Alun@ %s excluido!\n", aux->nome);
@@ -873,6 +879,4 @@ void excluir_aluno(list * List){
     index = 0;
     achou = 0;
 }
-
-
 
